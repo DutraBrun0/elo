@@ -1,0 +1,88 @@
+// Modelo de dados do Elo. Diagrama ER e justificativas: docs/data-model.md
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum ParticipantRole {
+  MEMBER
+  ADMIN
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  avatarUrl    String?
+  lastSeenAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  participations ConversationParticipant[]
+  messages       Message[]
+}
+
+model Conversation {
+  id            String           @id @default(uuid())
+  type          ConversationType @default(DIRECT)
+  /// Ids dos dois usuários ordenados ("a:b"). A constraint única impede conversas diretas duplicadas.
+  directKey     String?          @unique
+  title         String?
+  lastMessageAt DateTime         @default(now())
+  createdAt     DateTime         @default(now())
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@index([lastMessageAt(sort: Desc)])
+}
+
+/// Marcas d'água de entrega/leitura: o status de cada mensagem é derivado comparando
+/// Message.createdAt com lastDeliveredAt/lastReadAt dos outros participantes.
+model ConversationParticipant {
+  conversationId  String
+  userId          String
+  role            ParticipantRole @default(MEMBER)
+  lastDeliveredAt DateTime?
+  lastReadAt      DateTime?
+  joinedAt        DateTime        @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  conversationId String
+  senderId       String
+  type           MessageType @default(TEXT)
+  content        String?
+  imageUrl       String?
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  /// Sustenta a paginação por cursor (createdAt, id) do histórico.
+  @@index([conversationId, createdAt(sort: Desc), id(sort: Desc)])
+}
