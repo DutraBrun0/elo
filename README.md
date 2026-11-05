@@ -1,14 +1,6 @@
-<div align="center">
-
-<img src="web/public/favicon.svg" width="56" alt="" />
-
 # Elo
 
 **Mensageiro em tempo real** com status de entrega e leitura, presença online, indicador de digitação e histórico com scroll infinito.
-
-[![CI](https://github.com/DutraBrun0/elo/actions/workflows/ci.yml/badge.svg)](https://github.com/DutraBrun0/elo/actions/workflows/ci.yml)
-![Node](https://img.shields.io/badge/node-22-3ad389)
-![JavaScript](<https://img.shields.io/badge/back--end-JavaScript%20(ESM)-9281f7>)
 
 <img src="docs/demo.gif" alt="Dois usuários conversando em tempo real: indicador de digitação, mensagem chegando e status mudando para lida" width="760" />
 
@@ -285,5 +277,7 @@ O CI (GitHub Actions) roda lint, verificação de formatação, testes, build do
 - **Testes do front-end** (reducer e componentes) e testes end-to-end com Playwright no CI.
 
 ---
+- vale lembrar que utilizei o Claude Code como auxiliador para construir este projeto
+- este projeto tem um único propósito para aprendizado acadêmico
 
 Feito por [@DutraBrun0](https://github.com/DutraBrun0).
